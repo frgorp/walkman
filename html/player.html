@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8 />
+<!-- Website Design By: www.happyworm.com -->
+<title>Demo : The jPlayerPlaylist Object</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="skin/pandora/jplayer.pink.flag.css" rel="stylesheet" type="text/css" />
+<!--<link href="skin/blue.monday/jplayer.blue.monday.css" rel="stylesheet" type="text/css" />-->
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script>
+<script type="text/javascript" src="js/jquery.jplayer.min.js"></script>
+<script type="text/javascript" src="js/jplayer.playlist.min.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+$(document).ready(function(){
+	var myPlaylist = new jPlayerPlaylist({
+		jPlayer: "#jquery_jplayer_N",
+		cssSelectorAncestor: "#jp_container_N"
+	}, [
+		{
+			title: "Face To The Floor",
+			artist: "Chevelle",
+			mp3: "http://somewhere",
+			m4a: "http://somewhere_else",
+			poster: "http://somewhere_else_else",
+			free: true
+		}
+	], {
+		playlistOptions: {
+			enableRemoveControls: true,
+			autoPlay: true
+		},
+		swfPath: "js",
+		supplied: "webmv, mp3, m4a, oga, ogv",
+		volume: 0.35
+	});
+	// Miaow tracks
+	$("#playlist-add-bubble").click(function() {
+		myPlaylist.add({
+			title:"Bubble",
+			artist:"Miaow",
+			free:true,
+			mp3:"http://www.jplayer.org/audio/mp3/Miaow-07-Bubble.mp3",
+			oga:"http://www.jplayer.org/audio/ogg/Miaow-07-Bubble.ogg",
+			poster: "http://www.jplayer.org/audio/poster/Miaow_640x360.png"
+		});
+	});
+	$("#playlist-add-hidden").click(function() {
+		myPlaylist.add({
+			title:"Hidden",
+			artist:"Miaow",
+			free: true,
+			mp3:"http://www.jplayer.org/audio/mp3/Miaow-02-Hidden.mp3",
+			oga:"http://www.jplayer.org/audio/ogg/Miaow-02-Hidden.ogg",
+			poster: "http://www.jplayer.org/audio/poster/Miaow_640x360.png"
+		});
+	});
+	$("#playlist-add-tempered-song").click(function() {
+		myPlaylist.add({
+			title:"Tempered Song",
+			artist:"Miaow",
+			mp3:"http://www.jplayer.org/audio/mp3/Miaow-01-Tempered-song.mp3",
+			oga:"http://www.jplayer.org/audio/ogg/Miaow-01-Tempered-song.ogg",
+			poster: "http://www.jplayer.org/audio/poster/Miaow_640x360.png"
+		});
+	});
+	$("#playlist-add-lentement").click(function() {
+		myPlaylist.add({
+			title:"Lentement",
+			artist:"Miaow",
+			mp3:"http://www.jplayer.org/audio/mp3/Miaow-03-Lentement.mp3",
+			oga:"http://www.jplayer.org/audio/ogg/Miaow-03-Lentement.ogg",
+			poster: "http://www.jplayer.org/audio/poster/Miaow_640x360.png"
+		});
+	});
+	// The remove commands
+	$("#playlist-remove").click(function() {
+		myPlaylist.remove();
+	});
+	$("#playlist-remove--2").click(function() {
+		myPlaylist.remove(-2);
+	});
+	$("#playlist-remove--1").click(function() {
+		myPlaylist.remove(-1);
+	});
+	$("#playlist-remove-0").click(function() {
+		myPlaylist.remove(0);
+	});
+	$("#playlist-remove-1").click(function() {
+		myPlaylist.remove(1);
+	});
+	$("#playlist-remove-2").click(function() {
+		myPlaylist.remove(2);
+	});
+	// The shuffle commands
+	$("#playlist-shuffle").click(function() {
+		myPlaylist.shuffle();
+	});
+	$("#playlist-shuffle-false").click(function() {
+		myPlaylist.shuffle(false);
+	});
+	$("#playlist-shuffle-true").click(function() {
+		myPlaylist.shuffle(true);
+	});
+	// The select commands
+	$("#playlist-select--2").click(function() {
+		myPlaylist.select(-2);
+	});
+	$("#playlist-select--1").click(function() {
+		myPlaylist.select(-1);
+	});
+	$("#playlist-select-0").click(function() {
+		myPlaylist.select(0);
+	});
+	$("#playlist-select-1").click(function() {
+		myPlaylist.select(1);
+	});
+	$("#playlist-select-2").click(function() {
+		myPlaylist.select(2);
+	});
+	// The next/previous commands
+	$("#playlist-next").click(function() {
+		myPlaylist.next();
+	});
+	$("#playlist-previous").click(function() {
+		myPlaylist.previous();
+	});
+	// The play commands
+	$("#playlist-play").click(function() {
+		myPlaylist.play();
+	});
+	$("#playlist-play--2").click(function() {
+		myPlaylist.play(-2);
+	});
+	$("#playlist-play--1").click(function() {
+		myPlaylist.play(-1);
+	});
+	$("#playlist-play-0").click(function() {
+		myPlaylist.play(0);
+	});
+	$("#playlist-play-1").click(function() {
+		myPlaylist.play(1);
+	});
+	$("#playlist-play-2").click(function() {
+		myPlaylist.play(2);
+	});
+	// The pause command
+	$("#playlist-pause").click(function() {
+		myPlaylist.pause();
+	});
+	// Changing the playlist options
+	// Option: autoPlay
+	$("#playlist-option-autoPlay-true").click(function() {
+		myPlaylist.option("autoPlay", true);
+	});
+	$("#playlist-option-autoPlay-false").click(function() {
+		myPlaylist.option("autoPlay", false);
+	});
+	// Option: enableRemoveControls
+	$("#playlist-option-enableRemoveControls-true").click(function() {
+		myPlaylist.option("enableRemoveControls", true);
+	});
+	$("#playlist-option-enableRemoveControls-false").click(function() {
+		myPlaylist.option("enableRemoveControls", false);
+	});
+	// Option: displayTime
+	$("#playlist-option-displayTime-0").click(function() {
+		myPlaylist.option("displayTime", 0);
+	});
+	$("#playlist-option-displayTime-fast").click(function() {
+		myPlaylist.option("displayTime", "fast");
+	});
+	$("#playlist-option-displayTime-slow").click(function() {
+		myPlaylist.option("displayTime", "slow");
+	});
+	$("#playlist-option-displayTime-2000").click(function() {
+		myPlaylist.option("displayTime", 2000);
+	});
+	// Option: addTime
+	$("#playlist-option-addTime-0").click(function() {
+		myPlaylist.option("addTime", 0);
+	});
+	$("#playlist-option-addTime-fast").click(function() {
+		myPlaylist.option("addTime", "fast");
+	});
+	$("#playlist-option-addTime-slow").click(function() {
+		myPlaylist.option("addTime", "slow");
+	});
+	$("#playlist-option-addTime-2000").click(function() {
+		myPlaylist.option("addTime", 2000);
+	});
+	// Option: removeTime
+	$("#playlist-option-removeTime-0").click(function() {
+		myPlaylist.option("removeTime", 0);
+	});
+	$("#playlist-option-removeTime-fast").click(function() {
+		myPlaylist.option("removeTime", "fast");
+	});
+	$("#playlist-option-removeTime-slow").click(function() {
+		myPlaylist.option("removeTime", "slow");
+	});
+	$("#playlist-option-removeTime-2000").click(function() {
+		myPlaylist.option("removeTime", 2000);
+	});
+	// Option: shuffleTime
+	$("#playlist-option-shuffleTime-0").click(function() {
+		myPlaylist.option("shuffleTime", 0);
+	});
+	$("#playlist-option-shuffleTime-fast").click(function() {
+		myPlaylist.option("shuffleTime", "fast");
+	});
+	$("#playlist-option-shuffleTime-slow").click(function() {
+		myPlaylist.option("shuffleTime", "slow");
+	});
+	$("#playlist-option-shuffleTime-2000").click(function() {
+		myPlaylist.option("shuffleTime", 2000);
+	});
+	// Equivalent commands
+	$("#playlist-equivalent-1-a").click(function() {
+		myPlaylist.add({
+			title:"Your Face",
+			artist:"The Stark Palace",
+			mp3:"http://www.jplayer.org/audio/mp3/TSP-05-Your_face.mp3",
+			oga:"http://www.jplayer.org/audio/ogg/TSP-05-Your_face.ogg",
+			poster: "http://www.jplayer.org/audio/poster/The_Stark_Palace_640x360.png"
+		}, true);
+	});
+	$("#playlist-equivalent-1-b").click(function() {
+		myPlaylist.add({
+			title:"Your Face",
+			artist:"The Stark Palace",
+			mp3:"http://www.jplayer.org/audio/mp3/TSP-05-Your_face.mp3",
+			oga:"http://www.jplayer.org/audio/ogg/TSP-05-Your_face.ogg",
+			poster: "http://www.jplayer.org/audio/poster/The_Stark_Palace_640x360.png"
+		});
+		myPlaylist.play(-1);
+	});
+});
+//]]>
+</script>
+</head>
+<body>
+		<div id="jp_container_N" class="jp-video jp-video-270p">
+			<div class="jp-type-playlist">
+				<div id="jquery_jplayer_N" class="jp-jplayer"></div>
+				<div class="jp-gui">
+					<div class="jp-video-play">
+						<a href="javascript:;" class="jp-video-play-icon" tabindex="1">play</a>
+					</div>
+					<div class="jp-interface">
+						<div class="jp-progress">
+							<div class="jp-seek-bar">
+								<div class="jp-play-bar"></div>
+							</div>
+						</div>
+						<div class="jp-current-time"></div>
+						<div class="jp-duration"></div>
+						<div class="jp-controls-holder">
+							<ul class="jp-controls">
+								<li><a href="javascript:;" class="jp-previous" tabindex="1">previous</a></li>
+								<li><a href="javascript:;" class="jp-play" tabindex="1">play</a></li>
+								<li><a href="javascript:;" class="jp-pause" tabindex="1">pause</a></li>
+								<li><a href="javascript:;" class="jp-next" tabindex="1">next</a></li>
+								<li><a href="javascript:;" class="jp-stop" tabindex="1">stop</a></li>
+								<li><a href="javascript:;" class="jp-mute" tabindex="1" title="mute">mute</a></li>
+								<li><a href="javascript:;" class="jp-unmute" tabindex="1" title="unmute">unmute</a></li>
+								<li><a href="javascript:;" class="jp-volume-max" tabindex="1" title="max volume">max volume</a></li>
+							</ul>
+							<div class="jp-volume-bar">
+								<div class="jp-volume-bar-value"></div>
+							</div>
+							<ul class="jp-toggles">
+								<li><a href="javascript:;" class="jp-full-screen" tabindex="1" title="full screen">full screen</a></li>
+								<li><a href="javascript:;" class="jp-restore-screen" tabindex="1" title="restore screen">restore screen</a></li>
+								<li><a href="javascript:;" class="jp-shuffle" tabindex="1" title="shuffle">shuffle</a></li>
+								<li><a href="javascript:;" class="jp-shuffle-off" tabindex="1" title="shuffle off">shuffle off</a></li>
+								<li><a href="javascript:;" class="jp-repeat" tabindex="1" title="repeat">repeat</a></li>
+								<li><a href="javascript:;" class="jp-repeat-off" tabindex="1" title="repeat off">repeat off</a></li>
+							</ul>
+						</div>
+						<div class="jp-title">
+							<ul>
+								<li></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div class="jp-playlist">
+					<ul>
+						<!-- The method Playlist.displayPlaylist() uses this unordered list -->
+						<li></li>
+					</ul>
+				</div>
+				<div class="jp-no-solution">
+					<span>Update Required</span>
+					To play the media you will need to either update your browser to a recent version or update your <a href="http://get.adobe.com/flashplayer/" target="_blank">Flash plugin</a>.
+				</div>
+			</div>
+		</div>
+			<p style="margin-top:1em;">
+				Miaow audio: <code>add( <a href="javascript:;" id="playlist-add-bubble">{Bubble}</a> | <a href="javascript:;" id="playlist-add-hidden">{Hidden}</a> | <a href="javascript:;" id="playlist-add-tempered-song">{Tempered Song}</a> | <a href="javascript:;" id="playlist-add-lentement">{Lentement}</a> )</code><br />
+			</p>
+</body>
+</html>

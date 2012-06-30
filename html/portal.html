@@ -1,7 +1,61 @@
 <%inherit file="base.html" />
 <%block name="header">
+<script type="text/javascipt" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script type="text/javascript" src="js/jquery.jplayer.min.js"></script>
 </%block>
 
+<p><h3>userId:</h3> ${userId}</p>
+<p><h3>userToken:</h3> ${userToken}</p>
+
+<table width="500px">
+	<tr style="text-align:left">
+		<th>Name</th>
+		<th>ID</th>
+	</tr>
+	% for station in stations:
+		<tr>
+			<td>${station['stationName']}</td>
+			<td>${station['stationId']}</td>
+		</tr>
+	% endfor
+</table>
+${stations}
+
+<br />
+<h3>${songs[0]['songName']}</h3>
 <audio controls="controls" autoplay="autoplay">
-  <source src="http://audio-sjl-t1-1.pandora.com/access/876341796348285158.mp4?version=4&lid=216384927&token=nEk0GAtR64XTN5hSW29ga3oOfz2IDBFvkr%2Bvafmm8RO6jI9bYcki7D6rULeJEiPD%2Bq19WReE65AKY1%2FTXE3xH4UIgjf0Bto6fGlBDirfn2KM0DY2krCfsmunVMLyU%2BissDD6vMM9AaGM%2Fhv6f74XnAtNkwD3WPjMpSe3HRbGAAP6zUXcraxCkni23jyuDaE3rIf7r%2BV8jY0hFeDWRYo2iaAh8wd1ldPq3fd8Tam8qtFahKdYctgN3CVsG9%2FXw801wXOeHIfcfTIA2xc%2F9ZSwJIme2KdjdksdYvZjb5xjgEGUoo1gGc4MwXuUZxIW%2FcrPT02Sgr%2B0YEoSkQ9BeIL9brKu6g3fq9%2BH" type="audio/ogg" />
+	<source src="${songs[0]['additionalAudioUrl']}" type="audio/mpeg" />
+	<source src="${songs[0]['audioUrlMap']['highQuality']['audioUrl']}" type="audio/aac" />
+	Your browser doesn't seem to support either mp3 or m4a
 </audio>
+
+
+<table style="width:1024px">
+	<tr style="text-align:left">
+		<th>Title</th>
+		<th>Artist</th>
+		<th>MP3</th>
+		<th>M4A</th>
+		<th>Art</th>
+	</tr>
+	% for song in songs:
+		<tr>
+			<td>${song['songName']}<td>
+			<td>${song['artistName']}<td>
+			<td>${song['additionalAudioUrl']}<td>
+			<td>${song['audioUrlMap']['highQuality']['audioUrl']}<td>
+			<td>${song['albumArtUrl']}<td>
+		</tr>
+	% endfor
+</table>
+
+% for song in songs:
+		{
+			title: "${song['songName']}",
+			artist: "${song['artistName']}",
+			mp3: "${song['additionalAudioUrl']}",
+			m4a: "${song['audioUrlMap']['highQuality']['audioUrl']}",
+			poster: "${song['albumArtUrl']}",
+			free: true
+		},
+% endfor

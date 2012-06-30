@@ -1,11 +1,15 @@
 <%inherit file="base.html"/>
 <%block name="header">
+<script type="text/javascript" src="js/blowfish.js"></script>
 </%block>
 
 Welcome to Pandora proxy/music saver thingy
 
-<form action="pandoraLogin" method="post">
+<form action="authenticate" method="post">
 	Username: <input type="text" name="username" /><br />
 	Password: <input type="password" name="password" /><br />
+	<!--<input type="submit" value="Login" />-->
 	<input type="submit" value="Login" />
 </form>
+
+<a href="/register">Register for a Pandora Account</a>

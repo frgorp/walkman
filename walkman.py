@@ -1,9 +1,17 @@
 #!/usr/bin/env python2
 import cherrypy
-import pandora
+import urllib2
 from mako.template import Template
 from mako.lookup import TemplateLookup
+from pandora import Pandora
+from pandora.connection import PandoraConnection
+proxy_support = urllib2.ProxyHandler({"http" : "127.0.0.1:8118"})
+opener = urllib2.build_opener(proxy_support)
+urllib2.install_opener(opener)
 templates = TemplateLookup(directories = ['html'])
+pool_size = 2
+
+pool = [PandoraConnection() for i in xrange(pool_size)]
 
 class Resource(object):
     def __init__(self, content):
@@ -39,19 +47,63 @@ class ResourceIndex(Resource):
 class Root(object):
 	@cherrypy.expose
 	def index(self):
-		return templates.get_template("index.html").render()
+		session = cherrypy.session
+		session.load()
+		print session.keys()
+		return self.portal() if session.has_key('user') else templates.get_template("login.html").render()
 	@cherrypy.expose
-	def pandoraLogin(self, username, password):
-		return templates.get_template("portal.html").render()
+	def login(self):
+		return templates.get_template("login.html").render()
+	@cherrypy.expose
+	def authenticate(self, username, password):
+		pandora = Pandora(pool[0])
+		user = pandora.authenticate(username, password)
+		try:
+			cherrypy.session['user'] = {'userId': user['userId'], 'userAuthToken': user['userAuthToken']}
+			#print songs
+			#return self.portal()
+			return templates.get_template("login_success.html").render()
+		except ValueError:
+			return "Login failed, please do an 180"
+	
+	@cherrypy.expose
+	def player(self):
+		return templates.get_template("player.html").render()
+	@cherrypy.expose
+	def register(self):
+		return urllib2.urlopen("http://www.pandora.com/account/register")
+	@cherrypy.expose
+	def portal(self):
+		pandora = Pandora(pool[0])
+		user = cherrypy.session.get('user')
+		try:
+			stations = pandora.get_station_list(user)
+			stations = [{'stationName': s['stationName'], 'stationId': s['stationId']} for s in stations]
+			songs = pandora.get_next_song(user, stations[0]['stationId'])
+			#songs = [{'name': s['songName'], 'm4a': s['audioUrlMap']['highQuality']['audioUrl'], 'mp3': s['additionalAudioUrl']} if s.has_key('songName') else None for s in songs]
+			songs = filter(lambda x: x.has_key('songName'), songs)
 
+			#print songs
+			return templates.get_template("portal.html").render(
+				userId = user['userId'], 
+				userToken = user['userAuthToken'], 
+				stations = stations,
+				songs = songs
+			)
+		except ValueError:
+			return "Login failed, please do an 180"
+	@cherrypy.expose
+	def get_more_songs(self, stationId):
+		pandora = Pandora(pool[0])
+		user = cherrypy.session.get('user')
+		try:
+			return pandora.get_next_song(user, u"%s" % stationId)
+		except ValueError:
+			return "failed"
 class Api(object):
 	pass
 
 root = Root()
 root.api = Api()
-#root.api.sidewinder = Resource({'color': 'red', 'weight': 176, 'type': 'stable'})
-root.api.teebird = Resource({'color': 'green', 'weight': 173, 'type': 'overstable'})
-#root.api.blowfly = Resource({'color': 'purple', 'weight': 169, 'type': 'putter'})
-#root.api.resource_index = ResourceIndex({'sidewinder': 'sidewinder', 'teebird': 'teebird', 'blowfly': 'blowfly'})
 
 cherrypy.quickstart(root, '/', 'walkman.config')

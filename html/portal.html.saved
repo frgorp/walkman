@@ -9,12 +9,11 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
 <script type="text/javascript" src="js/jquery-ui.custom.min.js"> </script>
 <script type="text/javascript" src="js/kaiten.js"> </script>
-<script type="text/javascript" src="js/jquery.ba-resize.min.js"></script>
 <script type="text/javascript" src="js/jquery.jplayer.min.js"></script>
-<script type="text/javascript" src="js/jquery.jplayer.min.js"></script>
-<script type="text/javascript" src="js/jplayer.playlist.js"></script>
 <link href="skin/pandora/jplayer.pandora.flag.css" rel="stylesheet" type="text/css" />
 <link href="css/pandora.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="js/jquery.jplayer.min.js"></script>
+<script type="text/javascript" src="js/jplayer.playlist.js"></script>
 <script type="text/javascript">
 //<![CDATA[
 $(document).ready(function(){
@@ -23,8 +22,6 @@ $(document).ready(function(){
 	var MIN_SONGS = 4;
 	var MAX_SONGS = 8;
 	var station = '${stationId}';
-	var stationElement = $("#playlist-setStation-${stationId}");
-	stationElement.addClass("selectedStation");
 
 	function delay(millis) {
 		var startTime = new Date();
@@ -57,23 +54,18 @@ $(document).ready(function(){
 
 	function getMoreSongs(selectOnReceive) {
 		$.post('api/songs', {stationId: station}, function(data) {
-			if (data['success'] = true) {
-				for (song in data['songs']) {
-					var newSong = data['songs'][song];
-					newSong['expire'] = getExpireTime(EXPIRE_TIME);
-					myPlaylist.add(newSong, false);
-					delay(WAIT_MILLIS);
-				}
-				if (selectOnReceive) {
-					myPlaylist.select(0);
-					myPlaylist.play();
-				}
-				for (i = 0; i < myPlaylist.playlist.length - MAX_SONGS; i++) {
-					myPlaylist.remove(0);
-				}
-			} 
-			else {
-				alert("Failed to retrieve additional songs");
+			for (song in data) {
+				var newSong = data[song];
+				newSong['expire'] = getExpireTime(EXPIRE_TIME);
+				myPlaylist.add(newSong, false);
+				delay(WAIT_MILLIS);
+			}
+			if (selectOnReceive) {
+				myPlaylist.select(0);
+				myPlaylist.play();
+			}
+			for (i = 0; i < myPlaylist.playlist.length - MAX_SONGS; i++) {
+				myPlaylist.remove(0);
 			}
 		}, "json");
 	}
@@ -89,7 +81,6 @@ $(document).ready(function(){
 			mp3: "${song['additionalAudioUrl']}",
 			m4a: "${song['audioUrlMap']['highQuality']['audioUrl']}",
 			poster: "${song['albumArtUrl']}",
-			trackToken: "${song['trackToken']}",
 			free: true
 		},
 	% endfor
@@ -135,12 +126,9 @@ $(document).ready(function(){
 
 	// Playlist chooser thingy
 	% for station in stations:
-		$("#playlist-setStation-${station['stationId']}").click(function() {
+		$("#playlist-setStation-${cleanName(station['stationName'])}").click(function() {
 			if (station != '${station['stationId']}') {
-				stationElement.removeClass('selectedStation');
 				station = '${station['stationId']}';
-				stationElement = $("#playlist-setStation-${station['stationId']}");
-				stationElement.addClass('selectedStation');
 				myPlaylist.defaultRemove();
 				delay(WAIT_MILLIS);
 				getMoreSongs(true);
@@ -150,10 +138,7 @@ $(document).ready(function(){
 
 	// Upvote/downvote
 	$("#pandora-upvote").click(function() {
-		//alert("MOARRRRR");
-		$.post('api/upvote', {
-		}, function(data) {
-		}, "json");
+		alert("MOARRRRR");
 	});
 
 	$("#pandora-downvote").click(function() {
@@ -170,8 +155,7 @@ $(document).ready(function(){
 		}, function(data) {
 			//alert(data);
 			if (data['success']) {
-				var target = encodeURIComponent(data['file']);
-				window.location.href = '/download?song=' + target;
+				window.location.href = '/download?song=' + data['file'];
 			}
 		}, "json");
 			
@@ -210,9 +194,6 @@ $(document).ready(function(){
 
 <body>
 	<div id="container"></div>
-	<div id="custom-options-text" class="">
-		<a href="/logout" class="logout-text"><img src="images/logout.png" class="lLink"><img src="images/logout-hover.png" class="lHover"><p> Log Out </p></a>
-	</div>
 	<div id="dock" style="display:none;">
 		<div id="widgets" class = "k-panel">
 			<div class="panel-body">
@@ -252,12 +233,12 @@ $(document).ready(function(){
 										<div class="jp-volume-bar">
 											<div class="jp-volume-bar-value"></div>
 										</div>
-										<div class="pandora-controls">
-											<ul class="pandora-ratings">
-												<li><a id="pandora-downvote" href="#" class="pandora-thumbs-down" tabindex="1"><img src="images/grey-down.png" /></a></li>
-												<li><a id="pandora-upvote" href="#" class="pandora-thumbs-up" tabindex="1"><img src="images/grey-up.png" /></a></li>
-											</ul>			
-										</div>
+									</div>
+									<div class="pandora-controls">
+										<ul class="pandora-ratings">
+											<li><a id="pandora-downvote" href="#" class="pandora-thumbs-down" tabindex="1">Less</a></li>
+											<li><a id="pandora-upvote" href="#" class="pandora-thumbs-up" tabindex="1">Moar</a></li>
+										</ul>			
 									</div>
 									<div class="jp-title">
 										<ul>
@@ -276,7 +257,7 @@ $(document).ready(function(){
 						<div class="station-select">
 							Stations: | 
 							% for station in stations:
-								<a href="javascript:;" id="playlist-setStation-${station['stationId']}">${station['stationName']}</a> |
+								<a href="javascript:;" id="playlist-setStation-${cleanName(station['stationName'])}">${station['stationName']}</a> |
 							% endfor
 						</div>
 						<h1 class="song-download"><a href="javascript:;" id="download">Download Song</a></h1>
@@ -301,14 +282,13 @@ $(document).ready(function(){
 				% endfor
 			</table>
 			${stations} -->
-				<div class="block block-nav">
-					<div class="items navigable" data-load='{"kConnector":"html.dom","contentSelector":"#doc-storage #c1","kTitle":"Chapter I"}'>
-						<div class="head">
-						</div>
-						<div class="label">History</div>
-						<div class="info"></div>
-						<div class="tail"></div>
+			<div class="block block-nav">
+				<div class="items navigable" data-load='{"kConnector":"html.dom","contentSelector":"#doc-storage #c1","kTitle":"Chapter I"}'>
+					<div class="head">
 					</div>
+					<div class="label">History</div>
+					<div class="info"></div>
+					<div class="tail"></div>
 				</div>
 			</div>
 		</div>
@@ -319,7 +299,7 @@ $(document).ready(function(){
 				$K = $('#container');
 				// initialize Kaiten
 				$K.kaiten({ 
-					columnWidth : '400px',
+					columnWidth : '400',
 					optionsSelector : '#custom-options-text',
 					startup : function(dataFromURL){
 						// handle URL parameters sent when opening a panel in a new tab
@@ -330,7 +310,7 @@ $(document).ready(function(){
 						else
 						{
 							// load home panel content
-							this.kaiten('load', { kConnector:'html.dom', contentSelector:'#dock #widgets', kTitle:'Control Panel'});
+							this.kaiten('load', { kConnector:'html.dom', contentSelector:'#widgets', kTitle:'Control Panel'});
 						}
 					}
 				});

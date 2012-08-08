@@ -1,15 +1,32 @@
 <%inherit file="base.html"/>
 <%block name="header">
-<script type="text/javascript" src="js/blowfish.js"></script>
+<script type="text/javascript" src="js/crypto/jsbn.js"></script>
+<script type="text/javascript" src="js/crypto/prng4.js"></script>
+<script type="text/javascript" src="js/crypto/rng.js"></script>
+<script type="text/javascript" src="js/crypto/rsa.js"></script>
+<script type="text/javascript" src="js/crypto/base64.js"></script>
+<script type="text/javascript">
+	function encryptAndSend() {
+		var loginForm = document.forms.login;
+		var username = loginForm.email.value;
+		var password = loginForm.password.value;
+		var rsa = new RSAKey();
+		rsa.setPublic("${pub_key}", "10001");
+		document.forms.blob.crypted.value = rsa.encrypt('{"username": "' + username + '", "password": "' + password + '"}');
+		document.forms.blob.submit();
+	}
+</script>
 </%block>
 
 Welcome to Pandora proxy/music saver thingy
-
-<form action="authenticate" method="post">
-	Username: <input type="text" name="username" /><br />
-	Password: <input type="password" name="password" /><br />
-	<!--<input type="submit" value="Login" />-->
-	<input type="submit" value="Login" />
+<form action="authenticate" method="post" name="blob">
+	<input type="hidden" name="crypted"/>
 </form>
-
+<form method="post" name="login">
+	Username: <input type="text" name="email" /><br />
+	Password: <input type="password" name="password" /><br />
+	<input type="button" value="Login" onClick="encryptAndSend()" />
+</form>
+<!--<button onclick="hash_and_submit()">Login</button>-->
+<br />
 <a href="/register">Register for a Pandora Account</a>

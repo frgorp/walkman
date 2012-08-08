@@ -1,6 +1,8 @@
 *.swp
 *.py[co]
 warehouse
+crypto
+sessions
 
 # Packages
 *.egg

@@ -1,0 +1,73 @@
+div.pandora-controls {
+	background-color: inherit;
+	position: absolute;
+	margin-top: 3px;
+	left: 324px;
+}
+
+div.pandora-controls ul {
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+}
+
+div.pandora-controls ul li {
+	display: inline-block;
+	height: 34px;
+	width: 32px;
+	overflow: hidden;
+}
+
+div.pandora-controls ul li a {
+	display: block;
+	color: #fff;
+	/*background-color: #000;*/
+}
+
+div.pandora-controls ul li a.pandora-thumbs-up {
+	/*background: #0F0;*/
+}
+
+div.pandora-controls ul li a.pandora-thumbs-down {
+}
+
+.selectedStation {
+	background-color: #525252;
+	color: #bebebe !important;
+}
+
+a.logout-text {
+	left: 16px;
+	text-decoration: none;
+	font-size: 16px;
+	color: black;
+	font-weight: bold;
+}
+
+a.logout-text:hover {
+	color: #bebebe;
+}
+
+a.logout-text p {
+	position: relative;
+	left: -12px;
+	display: inline;
+}
+
+a.logout-text img.lLink {
+	visibility: visible;
+}
+
+a.logout-text:hover img.lLink {
+	visibility: hidden;
+}
+
+a.logout-text img.lHover {
+	position: relative;
+	left: -12px;
+	visibility: hidden;
+}
+
+a.logout-text:hover img.lHover {
+	visibility: visible;
+}

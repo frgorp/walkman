@@ -3,6 +3,7 @@
 warehouse
 crypto
 sessions
+db/manage.py
 
 # Packages
 *.egg

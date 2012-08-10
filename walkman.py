@@ -7,6 +7,7 @@ import rsa
 from mako.template import Template
 from mako.lookup import TemplateLookup
 from pandora import Pandora
+from pandora.song import Song
 from lib.pandora_pool import PandoraPool
 from lib.song_processor import SongProcessor
 #proxy_support = urllib2.ProxyHandler({"http" : "127.0.0.1:8118"})
@@ -15,7 +16,7 @@ from lib.song_processor import SongProcessor
 templates = TemplateLookup(directories = ['html'])
 pool_size = 2
 
-pool = PandoraPool(pool_size, proxy = "127.0.0.1:8118")
+pool = PandoraPool(pool_size, proxy = "http://127.0.0.1:8118")
 processor = SongProcessor("spool/")
 
 with open('crypto/privkey.pem') as privFile:
@@ -25,6 +26,9 @@ with open('crypto/pubkey.mod') as pubFile:
 	pubModulus = pubFile.read()[:-1]
 
 class PandoraApi(object):
+	_LOVED = True
+	_BAN = False
+
 	@cherrypy.expose
 	def index(self):
 		cherrypy.lib.jsontools.json_out()
@@ -52,7 +56,9 @@ class PandoraApi(object):
 		user = cherrypy.session.get('user')
 		print stationId
 		user['stationId'] = stationId;
-		return	self.respond_success(self.process_songs(pandora.get_next_song(user, u"%s" % stationId)))
+		fragment = pandora.get_fragment(user, u"%s" % stationId)
+		songs = [vars(Song(info)) for info in filter(lambda x: x.has_key('songName'), fragment)]
+		return	self.respond_success({'songs': songs})
 
 	@cherrypy.expose
 	def stations(self):
@@ -62,39 +68,34 @@ class PandoraApi(object):
 
 	@cherrypy.expose
 	def downvote(self, trackToken):
+		pandora = Pandora(pool.getAgent())
+		user = cherrypy.session.get('user')
+		print trackToken
+		response = pandora.rate_song(user, trackToken, PandoraApi._BAN)
+		print response
 		return self.respond_success()
 
 	@cherrypy.expose
 	def upvote(self, trackToken):
+		pandora = Pandora(pool.getAgent())
+		user = cherrypy.session.get('user')
+		print trackToken
+		response = pandora.rate_song(user, trackToken, PandoraApi._LOVED)
+		print response
 		return self.respond_success()
 
 	@cherrypy.expose
 	def generateDownloadLink(self, title, artist, mp3Url, poster):
 		result = processor.downloadSong(title, artist, mp3Url, poster)
 		return self.respond_success(result)
-		
-	def respond_success(self, data={}):
+
+	def respond_success(self, data={}, skip_dump=False):
 		data['success'] = True
-		return json.dumps(data)
+		return data if skip_dump else json.dumps(data)
 
-	def respond_failure(self, data):
+	def respond_failure(self, data={}, skip_dump=False):
 		data['success'] = False
-		return json.dumps(data)
-
-	def process_songs(self, songs):
-		songs = filter(lambda x: x.has_key('songName'), songs)
-		return {'songs': [
-			{
-				'title': song['songName'],
-				'artist': song['artistName'],
-				'mp3': song['additionalAudioUrl'],
-				'm4a': song['audioUrlMap']['highQuality']['audioUrl'],
-				'poster': song['albumArtUrl'],
-				'trackToken': song['trackToken'],
-				'free': True
-			}
-			for song in songs
-		]}
+		return data if skip_dump else json.dumps(data)
 
 class Root(object):
 	@cherrypy.expose
@@ -145,10 +146,11 @@ class Root(object):
 			stations = pandora.get_station_list(user)
 			stations = [{'stationName': s['stationName'], 'stationId': s['stationId']} for s in stations]
 			chosenStation = user['stationId'] if user.has_key('stationId') else stations[0]['stationId']
-			songs = pandora.get_next_song(user, chosenStation)
-			print chosenStation
+			fragment = pandora.get_fragment(user, chosenStation)
+			#print chosenStation
+			#print songs[0]
 			#songs = [{'name': s['songName'], 'm4a': s['audioUrlMap']['highQuality']['audioUrl'], 'mp3': s['additionalAudioUrl']} if s.has_key('songName') else None for s in songs]
-			songs = filter(lambda x: x.has_key('songName'), songs)
+			songs = [Song(info) for info in filter(lambda x: x.has_key('songName'), fragment)]
 
 			#print songs
 			return templates.get_template("portal.html").render(

@@ -78,20 +78,16 @@ $(document).ready(function(){
 		}, "json");
 	}
 
+	function getCurrentSong(playlist) {
+		return playlist.playlist[playlist.current];
+	}
+
 	var myPlaylist = new jPlayerPlaylist({
 		jPlayer: "#jquery_jplayer_N",
 		cssSelectorAncestor: "#jp_container_N"
 	}, [
 	% for song in songs:
-		{
-			title: "${song['songName']}",
-			artist: "${song['artistName']}",
-			mp3: "${song['additionalAudioUrl']}",
-			m4a: "${song['audioUrlMap']['highQuality']['audioUrl']}",
-			poster: "${song['albumArtUrl']}",
-			trackToken: "${song['trackToken']}",
-			free: true
-		},
+		${song.to_json()},
 	% endfor
 	], {
 		playlistOptions: {
@@ -133,6 +129,17 @@ $(document).ready(function(){
 		}
 	}
 
+	myPlaylist.defaultPlay = myPlaylist.play;
+	myPlaylist.play = function(index) {
+		myPlaylist.defaultPlay(index);
+		if (getCurrentSong(myPlaylist).songRating) {
+			$("#pandora-upvote-icon").attr("src", "images/arrow-liked.png");
+		}
+		else {
+			$("#pandora-upvote-icon").attr("src", "images/grey-up.png");
+		}
+	}
+
 	// Playlist chooser thingy
 	% for station in stations:
 		$("#playlist-setStation-${station['stationId']}").click(function() {
@@ -150,14 +157,31 @@ $(document).ready(function(){
 
 	// Upvote/downvote
 	$("#pandora-upvote").click(function() {
+		var current = getCurrentSong(myPlaylist);
 		//alert("MOARRRRR");
 		$.post('api/upvote', {
+			trackToken: current.trackToken
 		}, function(data) {
+			if (data['success']) {
+				current.songRating = 1;
+				if (current == getCurrentSong(myPlaylist)) {
+					$("#pandora-upvote-icon").attr("src", "images/arrow-liked.png");
+				}
+			}
 		}, "json");
 	});
 
 	$("#pandora-downvote").click(function() {
-		alert("yea, it does kinda suck...");
+		var current = getCurrentSong(myPlaylist);
+		$.post('api/downvote', {
+			trackToken: current.trackToken
+		}, function(data) {
+			if (data['success']) {
+				if (current == getCurrentSong(myPlaylist)) {
+					myPlaylist.next();
+				}
+			}
+		}, "json");
 	});
 
 	$("#download").click(function() {
@@ -255,7 +279,7 @@ $(document).ready(function(){
 										<div class="pandora-controls">
 											<ul class="pandora-ratings">
 												<li><a id="pandora-downvote" href="#" class="pandora-thumbs-down" tabindex="1"><img src="images/grey-down.png" /></a></li>
-												<li><a id="pandora-upvote" href="#" class="pandora-thumbs-up" tabindex="1"><img src="images/grey-up.png" /></a></li>
+												<li><a id="pandora-upvote" href="#" class="pandora-thumbs-up" tabindex="1"><img id="pandora-upvote-icon" src="images/grey-up.png" /></a></li>
 											</ul>			
 										</div>
 									</div>

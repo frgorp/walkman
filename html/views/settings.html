@@ -1,0 +1,12 @@
+<%inherit file="view_base.html" />
+<%!
+	from re import sub
+	def cleanName(station):
+		return sub(" |'", '_', station)
+%>
+<%block name="header">
+</%block>
+
+<body>
+	${data}
+</body>

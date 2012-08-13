@@ -106,7 +106,9 @@ Kaiten = /**@lends jQuery.ui.kaiten.prototype*/{
 		 * @type		String
 		 * @default		'<div class="block-nav"><div class="items clickable remove-panel"><div class="label">Remove this panel</div></div></div>'
 		 */
-		defaultPanelTitleBarOptions	: '<div class="block-nav"><div class="items clickable remove-panel"><div class="label">Remove this panel</div></div></div>'
+		defaultPanelTitleBarOptions	: '<div class="block-nav"><div class="items clickable remove-panel"><div class="label">Remove this panel</div></div></div>',
+
+		widgetsReservedSpace: 1,
 		/**#@-*/
 	},
 	
@@ -1165,7 +1167,7 @@ Kaiten = /**@lends jQuery.ui.kaiten.prototype*/{
 		{
 			this.element.find(this.selectors.columnsInc).removeAttr('disabled').removeClass(this.selectors.disabledClass);
 		}
-		if (this._state.columnsCount <= 1) // limitation
+		if (this._state.columnsCount <= 2) // limitation
 		{
 			this.element.find(this.selectors.columnsDec).attr('disabled', 'disabled').addClass(this.selectors.disabledClass);
 		}
@@ -2489,7 +2491,9 @@ Kaiten = /**@lends jQuery.ui.kaiten.prototype*/{
 		
 		this._getPrevPanels(':visible', $panel).each(function(){
 			$this = $(this);
-			$this.kpanel('animate', -$this.kpanel('getEdgePosition', true), null, self._state);
+			if (!self.getPanel(0).is($this)) {
+				$this.kpanel('animate', -$this.kpanel('getEdgePosition', true), null, self._state);
+			}
 		});
 		
 		this._getNextPanels(':visible', $panel).each(function(){
@@ -2499,7 +2503,8 @@ Kaiten = /**@lends jQuery.ui.kaiten.prototype*/{
 		});
 		
 		ps = $panel.kpanel('getState', true);
-		$panel.kpanel('animate', -ps.position, this._state.columnsCount-ps.width, this._state);
+		var _widgetsReserved = ps.index > 0? this.options.widgetsReservedSpace : 0;
+		$panel.kpanel('animate', -ps.position + _widgetsReserved, this._state.columnsCount-(ps.width+_widgetsReserved), this._state);
 	},
 	
 	/**
@@ -3531,9 +3536,10 @@ Kaiten = /**@lends jQuery.ui.kaiten.prototype*/{
 			}			
 
 			// newtab - disable for persistent sidebar
-			if (!this.element.prev().length) {
+			// disabled
+			//if (!this.element.prev().length) {
 				this.element.find(toolsSelectors.newtab).remove();
-			}
+			//}
 
 			// prev
 			if (!this.element.prev().length) // home panel : always shown, but disabled
@@ -3557,6 +3563,9 @@ Kaiten = /**@lends jQuery.ui.kaiten.prototype*/{
 				var $nextPanel = this.element.next();
 				this.element.find(toolsSelectors.next).toggle(!$nextPanel.kpanel('isVisible', true, ks));				
 			}			
+			if (!this.element.prev().length) {
+				this.element.find(toolsSelectors.maximize).remove();
+			}
 			// maximize/originalSize
 			if (ks.columnsCount === 1)
 			{
@@ -3565,7 +3574,7 @@ Kaiten = /**@lends jQuery.ui.kaiten.prototype*/{
 			else
 			{
 				this.element.find(toolsSelectors.maximize).show();
-				if (this._state.width < ks.columnsCount)
+				if (this._state.width < ks.columnsCount - this.options.widgetsReservedSpace)
 				{
 					this.element.find(toolsSelectors.maximize).removeClass(Kaiten.selectors.activeClass);
 				}

@@ -1,0 +1,26 @@
+<%inherit file="view_base.html" />
+<%!
+	from re import sub
+	def cleanName(station):
+		return sub(" |'", '_', station)
+%>
+<%block name="header">
+<link href="css/views/history.css" rel="stylesheet" type="text/css" />
+</%block>
+
+<body>
+	<table class="history">
+		<tr>
+			<th>Title</th>
+			<th>Artist</th>
+			<th>Album</th>
+		</tr>
+	% for i,song in enumerate(history):
+		<tr class="c${i % 2}${'' if song.liked is None else ' liked' if song.liked else ' hated'}">
+			<td>${song.title.decode('utf-8')}</td>
+			<td>${song.artist.decode('utf-8')}</td>
+			<td>${song.album.decode('utf-8')}</td>
+		</tr>
+	% endfor
+	</table>
+</body>

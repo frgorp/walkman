@@ -11,160 +11,74 @@
 <script type="text/javascript" src="js/kaiten.js"> </script>
 <script type="text/javascript" src="js/jquery.ba-resize.min.js"></script>
 <script type="text/javascript" src="js/jquery.jplayer.min.js"></script>
-<script type="text/javascript" src="js/jquery.jplayer.min.js"></script>
 <script type="text/javascript" src="js/jplayer.playlist.js"></script>
+<script type="text/javascript" src="js/sidebar.player.js"></script>
 <link href="skin/pandora/jplayer.pandora.flag.css" rel="stylesheet" type="text/css" />
 <link href="css/pandora.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript">
 //<![CDATA[
 $(document).ready(function(){
-	var EXPIRE_TIME = 1800;
-	var WAIT_MILLIS = 250
-	var MIN_SONGS = 4;
-	var MAX_SONGS = 8;
-	var station = '${stationId}';
-	var stationElement = $("#playlist-setStation-${stationId}");
-	stationElement.addClass("selectedStation");
-
-	function delay(millis) {
-		var startTime = new Date();
-		var currentTime = undefined;
-		do {
-			currentTime = new Date();
-		} while (currentTime - startTime < millis);
-	}
-
-	function getExpireTime(offset) {
-		var currentTime = new Date();
-		currentTime.setMinutes(currentTime.getMinutes() + offset);
-	}
-
-	function trimPlaylist(playlist) {
-		var currentTime = new Date();
-		var current = 0;
-		// removes expired songs
-		for (i = 0; i < playlist.length; i++) {
-			if (playlist[current]['expire'] < currentTime) {
-				playlist.splice(current, 1);
-			}
-			else {
-				current++;
-			}
-		}
-		playlist.splice(0, playlist.length > MAX_SONGS? playlist.length - MAX_SONGS : 0);
-		return playlist;
-	}
-
-	function getMoreSongs(selectOnReceive) {
-		$.post('api/songs', {stationId: station}, function(data) {
-			if (data['success'] = true) {
-				for (song in data['songs']) {
-					var newSong = data['songs'][song];
-					newSong['expire'] = getExpireTime(EXPIRE_TIME);
-					myPlaylist.add(newSong, false);
-					delay(WAIT_MILLIS);
-				}
-				if (selectOnReceive) {
-					myPlaylist.select(0);
-					myPlaylist.play();
-				}
-				for (i = 0; i < myPlaylist.playlist.length - MAX_SONGS; i++) {
-					myPlaylist.remove(0);
-				}
-			} 
-			else {
-				alert("Failed to retrieve additional songs");
-			}
-		}, "json");
-	}
-
-	function getCurrentSong(playlist) {
-		return playlist.playlist[playlist.current];
-	}
-
-	var myPlaylist = new jPlayerPlaylist({
+	var myPlaylist = new jPandoraPlayer({
 		jPlayer: "#jquery_jplayer_N",
 		cssSelectorAncestor: "#jp_container_N"
 	}, [
-	% for song in songs:
-		${song.to_json()},
-	% endfor
+##	% for song in songs:
+##		${song.to_json()},
+##	% endfor
 	], {
 		playlistOptions: {
-			enableRemoveControls: true,
-			autoPlay: true,
+			autoPlay: false,
+			displayTime: 'fast',
 		},
 		swfPath: "js",
 		supplied: "webmv, mp3, m4a",
-		solution: "flash",
+		solution: "flash, html",
 		volume: 0.35,
 		size: {
 			width: '100%',
 			height: '300px'
 		}
-	});
+	}, '${stationId}');
 	
-	$.each(myPlaylist.playlist, function(index, element) {
-		var currentTime = new Date();
-		element['expire'] = getExpireTime(EXPIRE_TIME);
-	});
-	$(myPlaylist.cssSelector.jPlayer).unbind($.jPlayer.event.ended);
-	$(myPlaylist.cssSelector.jPlayer).bind($.jPlayer.event.ended, function(event) {
-		var oldLength = myPlaylist.playlist.length;
-		var playlist = trimPlaylist(myPlaylist.playlist);
-		if (playlist.length != oldLength) {
-			myPlaylist.setPlaylist(playlist);
-		}
-		if (playlist.length - myPlaylist.current < MIN_SONGS) {
-			getMoreSongs();
-		}
-		myPlaylist.next();
-	});
-
-	myPlaylist.defaultRemove = myPlaylist.remove;
-	myPlaylist.remove = function(index) {
-		myPlaylist.defaultRemove(index);
-		if (myPlaylist.playlist.length < MIN_SONGS) {
-			getMoreSongs();
-		}
-	}
-
-	myPlaylist.defaultPlay = myPlaylist.play;
-	myPlaylist.play = function(index) {
-		myPlaylist.defaultPlay(index);
-		if (getCurrentSong(myPlaylist).songRating) {
-			$("#pandora-upvote-icon").attr("src", "images/arrow-liked.png");
-		}
-		else {
-			$("#pandora-upvote-icon").attr("src", "images/grey-up.png");
-		}
-	}
-
+	//$.each(myPlaylist.playlist, function(index, element) {
+	//	var currentTime = new Date();
+	//	element['expire'] = getExpireTime(EXPIRE_TIME);
+	//});
+	//$(myPlaylist.cssSelector.jPlayer).unbind($.jPlayer.event.ended);
+	//$(myPlaylist.cssSelector.jPlayer).bind($.jPlayer.event.ended, function(event) {
+	//	var oldLength = myPlaylist.playlist.length;
+	//	var playlist = trimPlaylist(myPlaylist.playlist);
+	//	if (playlist.length != oldLength) {
+	//		myPlaylist.setPlaylist(playlist);
+	//	}
+	//	if (playlist.length - myPlaylist.current < MIN_SONGS) {
+	//		getMoreSongs();
+	//	}
+	//	myPlaylist.next();
+	//});
 	// Playlist chooser thingy
 	% for station in stations:
 		$("#playlist-setStation-${station['stationId']}").click(function() {
-			if (station != '${station['stationId']}') {
-				stationElement.removeClass('selectedStation');
+			if (myPlaylist.currentStation != '${station['stationId']}') {
+				$("#playlist-setStation-" + myPlaylist.currentStation).removeClass('selectedStation');
 				station = '${station['stationId']}';
-				stationElement = $("#playlist-setStation-${station['stationId']}");
-				stationElement.addClass('selectedStation');
-				myPlaylist.defaultRemove();
-				delay(WAIT_MILLIS);
-				getMoreSongs(true);
+				$("#playlist-setStation-${station['stationId']}").addClass('selectedStation');
+				myPlaylist.switchStation('${station['stationId']}');
 			}
 		});
 	% endfor
+	 $("#playlist-setStation-" + myPlaylist.currentStation).addClass('selectedStation');
 
 	// Upvote/downvote
 	$("#pandora-upvote").click(function() {
-		var current = getCurrentSong(myPlaylist);
+		var current = myPlaylist.currentSong();
 		//alert("MOARRRRR");
 		$.post('api/upvote', {
 			trackToken: current.trackToken
 		}, function(data) {
 			if (data['success']) {
 				current.songRating = 1;
-				if (current == getCurrentSong(myPlaylist)) {
+				if (current == myPlaylist.currentSong()) {
 					$("#pandora-upvote-icon").attr("src", "images/arrow-liked.png");
 				}
 			}
@@ -172,12 +86,12 @@ $(document).ready(function(){
 	});
 
 	$("#pandora-downvote").click(function() {
-		var current = getCurrentSong(myPlaylist);
+		var current = myPlaylist.currentSong();
 		$.post('api/downvote', {
 			trackToken: current.trackToken
 		}, function(data) {
 			if (data['success']) {
-				if (current == getCurrentSong(myPlaylist)) {
+				if (current == myPlaylist.currentSong()) {
 					myPlaylist.next();
 				}
 			}
@@ -185,7 +99,7 @@ $(document).ready(function(){
 	});
 
 	$("#download").click(function() {
-		var current = myPlaylist.playlist[myPlaylist.current];
+		var current = myPlaylist.currentSong();
 		$.post('api/generateDownloadLink', {
 			'title': current.title,
 			'artist': current.artist,
@@ -198,35 +112,11 @@ $(document).ready(function(){
 				window.location.href = '/download?song=' + target;
 			}
 		}, "json");
-			
+
 	});
-	// The next/previous commands
-	$("#playlist-next").click(function() {
-		myPlaylist.next();
-	});
-	$("#playlist-previous").click(function() {
-		myPlaylist.previous();
-	});
-	// Equivalent commands
-	$("#playlist-equivalent-1-a").click(function() {
-		myPlaylist.add({
-			title:"Your Face",
-			artist:"The Stark Palace",
-			mp3:"http://www.jplayer.org/audio/mp3/TSP-05-Your_face.mp3",
-			oga:"http://www.jplayer.org/audio/ogg/TSP-05-Your_face.ogg",
-			poster: "http://www.jplayer.org/audio/poster/The_Stark_Palace_640x360.png"
-		}, true);
-	});
-	$("#playlist-equivalent-1-b").click(function() {
-		myPlaylist.add({
-			title:"Your Face",
-			artist:"The Stark Palace",
-			mp3:"http://www.jplayer.org/audio/mp3/TSP-05-Your_face.mp3",
-			oga:"http://www.jplayer.org/audio/ogg/TSP-05-Your_face.ogg",
-			poster: "http://www.jplayer.org/audio/poster/The_Stark_Palace_640x360.png"
-		});
-		myPlaylist.play(-1);
-	});
+
+
+	//getMoreSongs(true);
 });
 //]]>
 </script>
@@ -326,7 +216,7 @@ $(document).ready(function(){
 			</table>
 			${stations} -->
 				<div class="block block-nav">
-					<div class="items navigable" data-load='{"kConnector":"html.dom","contentSelector":"#doc-storage #c1","kTitle":"Chapter I"}'>
+					<div class="items navigable" data-load='{"kConnector":"html.page","url":"views/history","kTitle":"History"}'>
 						<div class="head">
 						</div>
 						<div class="label">History</div>
@@ -334,6 +224,17 @@ $(document).ready(function(){
 						<div class="tail"></div>
 					</div>
 				</div>
+
+				<div class="block block-nav">
+					<div class="items navigable" data-load='{"kConnector":"html.page","url":"views/settings","kTitle":"Settings"}'>
+						<div class="head">
+						</div>
+						<div class="label">Settings</div>
+						<div class="info"></div>
+						<div class="tail"></div>
+					</div>
+				</div>
+
 			</div>
 		</div>
 	</div>

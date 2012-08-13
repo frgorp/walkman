@@ -1,0 +1,38 @@
+table.history {
+}
+
+table.history tr {
+}
+
+table.history th {
+	font-size: 24px;
+	color: #dcdcdc;
+	text-align: left;
+	padding-left: 4px;
+	padding-bottom: 8px;
+}
+
+table.history tr td {
+	font-size: 16px;
+	color: #bebebe;
+	padding-bottom: 8px;
+	padding-top: 8px;
+	padding-left: 4px;
+	padding-right: 4px;
+}
+
+table.history tr.c0 td {
+	background-color: #282828;
+}
+
+table.history tr.c1 td {
+	background-color: #525252;
+}
+
+table.history tr.liked td:first-child {
+	border-left:4px solid #F29500;
+}
+
+table.history tr.hated td:first-child {
+	border-left:4px solid #0064EF;
+}
